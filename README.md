@@ -21,6 +21,8 @@
     <li><a href="#getting-started">Getting started</a></li>
     <li><a href="#collecting-bgp-data">Collecting BGP data</a></li>
     <li><a href="#collecting-tracroute-data">Collecting traceroute data</a></li>
+    <li><a href="#collecting-metadata">Collecting metadata</a></li>
+    <li><a href="#forming-a-topology">Forming a topology</a></li>
     <li><a href="#publications">Publications</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -54,6 +56,14 @@ $ pip install -r requirements.txt
 
 <!-- USING THE TOOL -->
 ## Collecting BGP data
+
+You can simply run:
+
+```sh
+$ run_inetvisor.sh
+```
+
+Alternatively you can follow the steps below to run each step manually, rather than the automated script.
 
 ### Find relevant route collectors
 
@@ -164,6 +174,27 @@ $ python utils/trace_to_adjacency.py -in data/traceroute.json -o data/adjacencie
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- COLLECTING METADATA -->
+## Collecting metadata
+
+You can manually collect the required files, each of which should be placed in the `data/source` directory.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- FORMING A TOPOLOGY -->
+## Forming a topology
+
+Run the following tool to collate the information as a topology graph. Only `-a` and `-o` are mandatory.
+
+```sh
+$ python topology/data_to_graph.py -a 'data/working/AS_ADJACENCIES.txt' -r 'data/working/AS_RELATIONSHIPS.txt' -c 'data/source/countries_with_colours.csv' -h4 'data/working/IPv4_HEGEMONY.csv' -h6 'data/working/IPv6_HEGEMONY.csv' -p 'data/source/peeringdb_2_dump_2025_11_06.json' -b 'data/source/tags.txt' 'data/source/bgptools-tags' -o 'data/output/graph.graphml'
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 <!-- PUBLICATIONS -->
 ## Publications
