@@ -296,7 +296,9 @@ if __name__ == '__main__':
         attributes[asn] = {}
 
         if args.countries is not None:
-            attributes[asn]['country_registered'] = get_asn_country.get(asn, '') # type: ignore
+            attributes[asn]['country_registered'] = get_asn_country.get(str(asn), '') # type: ignore
+
+            # Gets country code
 
             if attributes[asn]['country_registered'] != '': # type: ignore
                 attributes[asn]['country_registered_name'] = countries[attributes[asn]['country_registered']].get('name')
