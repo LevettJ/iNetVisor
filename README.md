@@ -165,7 +165,7 @@ $ collectors/traceroute/01_daily_collect.sh
 $ collectors/traceroute/02_daily_translate.sh
 ```
 
-### Transfrom traceroutes to AS adjacencies
+### Transform traceroutes to AS adjacencies
 
 This part of the tool takes as input the previously exported `traceroute.json` data and generates a new file containing a list of adjacencies as identified in the traceroute data. Notably, the function provided by this tool is *strict*: an AS is only considered adjacent where two ASNs are directly adjacent in the path, and so where an internal IP address, timeout/null response is seen, the ASNs on either side are not considered adjacent (contrary to the assumption used by some other tooling).
 
@@ -179,7 +179,20 @@ $ python utils/trace_to_adjacency.py -in data/traceroute.json -o data/adjacencie
 <!-- COLLECTING METADATA -->
 ## Collecting metadata
 
-You can manually collect the required files, each of which should be placed in the `data/source` directory.
+You can manually collect or generate the required and supplementary metadata files, each of which should be placed in the `data/source` directory.
+
+### Required files
+
+* **AS adjacency data** (this should be a `.txt` file of ASN pairings acquired using the steps above)
+
+
+### Optional files
+
+* **AS relationship data**: these are output as customer/provider or peer labels for the edges between AS nodes. You can generate this using by running `asrank.pl` on the data output from the `utils/format_asrank.py` script (as `.txt`), or alternatively download it a previously compiled version from the [CAIDA AS Relationships Dataset](https://www.caida.org/catalog/datasets/as-relationships/) (this should be a file of the form `YYYYMMDD.asrel2.txt`)
+* **Countries data**: this is a file containing basic metadata about global countries in the format `COUNTRY NAME|ISO 3166 ALPHA 2 CODE|LATITUDE (AVG)|LONGITUDE (AVG)|COLOUR`, used for general country-level AS placement, providing expanded country names for ASes, and a base colour for graph plotting.
+* **AS hegemony data**: this is calculated by using the [Internet Health Report's AS Hegemony tooling](https://github.com/InternetHealthReport/as-hegemony), and results in two `.csv` files of hegemony values, one for IPv4 and one for IPv6 peering.
+* **PeeringDB data snapshot**: we use the [CAIDA UCSD PeeringDB Dataset](https://www.caida.org/catalog/datasets/peeringdb/), which is a file of the form `peeringdb_2_dump_YYYY_MM_DD.json`. The data can alternatively be sourced using the PeeringDB API but the codebase will require some modification.
+* **bgp.tools tags**: this is acquired using the [bgp.tools  API](https://bgp.tools/kb/api). A template script for collecting this data can be found in `collectors/metadata/bgptools_tags.sh` (but will require adding an appropriate `--user-agent`).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -187,7 +200,23 @@ You can manually collect the required files, each of which should be placed in t
 <!-- FORMING A TOPOLOGY -->
 ## Forming a topology
 
-Run the following tool to collate the information as a topology graph. Only `-a` and `-o` are mandatory.
+From all of the data above, we can run the iNetVisor data-to-topology tool by running the following script with appropriate arguments:
+
+```sh
+$ python topology/data_to_graph.py --adjacencies "data/working/ADJACENCIES.txt" --output "data/output/GRAPH.graphml"
+```
+
+For a more detailed metadata graph, it also accepts the following arguments:
+
+* `--relationships`: the AS relationship data file.
+* `--countries`: the countries data file.
+* `--asnregs`: a cache of AS-to-country mappings from registry data (if not supplied, but a countries data file is present, this will be automatically generated and saved as `data/working/asn_to_country.json`)
+* `--hegemony4`: IPv4 AS hegemony data file.
+* `--hegemony6`: IPv6 AS hegemony data file.
+* `--peeringdb`: PeeringDB data snapshot.
+* `--bgptools`: two bgp.tools tag data files (the `data/source/tags.txt` list of tags, and the directory `data/source/bgptools-tags` containing the list of ASes for each tag).
+
+For example, we can run the script with all information supplied using a command similar to:
 
 ```sh
 $ python topology/data_to_graph.py -a 'data/working/AS_ADJACENCIES.txt' -r 'data/working/AS_RELATIONSHIPS.txt' -c 'data/source/countries_with_colours.csv' -h4 'data/working/IPv4_HEGEMONY.csv' -h6 'data/working/IPv6_HEGEMONY.csv' -p 'data/source/peeringdb_2_dump_2025_11_06.json' -b 'data/source/tags.txt' 'data/source/bgptools-tags' -o 'data/output/graph.graphml'
@@ -200,7 +229,6 @@ $ python topology/data_to_graph.py -a 'data/working/AS_ADJACENCIES.txt' -r 'data
 ## Publications
 
 - [(Preprint) Unveiling Internet Censorship: Analysing the Impact of Nation States’ Content Control Efforts on Internet Architecture and Routing Patterns](https://systronlab.github.io/publications/2024-unveiling-internet-censorship)
-- [(Abstract) From Internet to Emulator: A Virtual Testbed for Internet Routing Protocols](https://systronlab.github.io/publications/2024-from-internet-to-emulator)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

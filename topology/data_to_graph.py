@@ -107,10 +107,10 @@ def load_peeringdb_asns(filename):
         if asn is None:
             continue
         pdb_name = net.get('name', '')
-        pdb_type = net.get('info_types', None)
+        pdb_type = net.get('info_types', '')
         if isinstance(pdb_type, list):
             # Take first type in list as primary
-            pdb_type = pdb_type[0] if pdb_type else None
+            pdb_type = pdb_type[0] if pdb_type else ''
 
         # Identify all IXPs present at
         pops = []
@@ -134,9 +134,9 @@ def load_peeringdb_ixps(filename):
     for ix in ixps:
         pdb[int(ix.get('id'))] = {
             'name': ix.get('name'),
-            'country': ix.get('country', None),
-            'region': ix.get('region_continent', None),
-            'net_count': ix.get('net_count', None)
+            'country': ix.get('country', ''),
+            'region': ix.get('region_continent', ''),
+            'net_count': ix.get('net_count', '')
         }
     return pdb
 
@@ -340,7 +340,6 @@ if __name__ == '__main__':
                 attributes[asn]['bgptools_tags'] = '|' + attributes[asn]['bgptools_tags'] + '|'
     
     print('Attributes data compiled')
-    print(attributes[786])
 
     print('Exporting attributes to .json')
     with open('../data/working/asn_attributes.json', 'w') as f:
